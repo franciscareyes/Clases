@@ -10,14 +10,18 @@
 # Reading an exporting data
 
 library(readxl)
+library(data.table)
+
+#Variable que margina es la edad, ya que es la variable que no se repite.
 
 casos<-data.table(read_excel("Class_02/2020-03-17-Casos-confirmados.xlsx",na = "—",trim_ws = TRUE,col_names = TRUE),stringsAsFactors = FALSE)
 
-casos<-casos[Región=="Metropolitana",]
+casosRM<-casos[Región=="Metropolitana",]
 
-saveRDS
+saveRDS(casos,"Class_03/casosRM.rds") #para guardar la base de datos en una parte.
 
 write.csv(casos,file = 'Class_03/CasosCovid_RM.csv',fileEncoding = 'UTF-8')
+
 
 writexl::write_xlsx
 
@@ -25,13 +29,13 @@ library(foreign)
 
 write.dta
 
-casosRM<-fread("Class_03/CasosCovid_RM.csv",header = T, showProgress = T,data.table = T)
+casosRM<-fread("Class_03/CasosCovid_RM.csv",header = T, showProgress = T,data.table = T) #fread sirve para leer datos muy pesados
 
 casosRM[,table(Sexo)]
 casosRM[Sexo=="Fememino",Sexo:="Femenino"]
 
 
-# Creating (factor) variables
+# Creating (factor) variables, variables de tipo string
 
 class(casosRM$Sexo)
 
@@ -39,14 +43,16 @@ casosRM[,Sexo:=factor(Sexo,nmax = 2)]
 
 head(casosRM$Sexo)
 head(as.numeric(casosRM$Sexo))
-
-table(casosRM$Sexo)
+table(casosRM$sexo)
 casosRM[,.N,by=.(Sexo)]
-casosRM[,.N,by=.(Sexo,`Centro de salud`)]
+casosRM[,.N,by=.(Sexo,`Centro de salud`)] #crea una columna N en donde suma a los Masculinos y Femeninos por clinica.
 
-#Collapsing by Centro de Salud 
+#Collapsing by Centro de Salud , sumar las obs que uno quiere
 
-casosRM[,sum(`Casos confirmados`,na.rm = T),by=.(`Centro de salud`)][,V1/sum(V1)]
+n
+objeto1<-casosRM[,sum(`Casos confirmados`,na.rm = T),by=.(`Centro de salud`)][,V1/sum(V1,na.rm=T)]
+objeto1
+
 
 # collapsing by average age
 
