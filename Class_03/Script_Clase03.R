@@ -12,20 +12,27 @@
 library(readxl)
 library(data.table)
 
-<<<<<<< HEAD
+read_excel(path = "Class_02/") #Para hacer que aparezcan los archivos hay que apretar tabs
+
 #Variable que margina es la edad, ya que es la variable que no se repite.
 
 casos<-data.table(read_excel("Class_02/2020-03-17-Casos-confirmados.xlsx",na = "—",trim_ws = TRUE,col_names = TRUE),stringsAsFactors = FALSE)
+#trim_ws: espacios en blanco que los elimine, col_names: el nombre de las columnas, stringsAsfactores: si hay una variable que sea string que nos las pase, lo ideal es poner false para que no asigne numeros a los valores y uno pueda analizar primero los datos.
+
+casos[,table(Región)] #PAra ver cuantos casos hay por región
+casos[,.N,by=.(Región)]#Otra forma de hacerlo
 
 casosRM<-casos[Región=="Metropolitana",]
+#Filtro por casos de región metroplitana
+
+###### Exportar datos
 
 saveRDS(casos,"Class_03/casosRM.rds") #para guardar la base de datos en una parte.
 
-write.csv(casos,file = 'Class_03/CasosCovid_RM.csv',fileEncoding = 'UTF-8')
+write.csv(casos,file = 'Class_03/CasosCovid_RM.csv',fileEncoding = 'UTF-8') #Es más liviano para trasnportar
 
 
-writexl::write_xlsx
-=======
+writexl::write_xlsx #Para escribir una excel, los :: significa que uno puede entrar a ver las variables de la base de datos
 
 
 casos<-data.table(read_excel("Class_02/2020-03-17-Casos-confirmados.xlsx",na = "—",trim_ws = TRUE,col_names = TRUE),stringsAsFactors = FALSE)
@@ -38,25 +45,26 @@ saveRDS(casos,"Class_03/casosRM.rds")
 write.csv(casos,file = 'Class_03/CasosCovid_RM.csv',fileEncoding = 'UTF-8')
 
 writexl::write_xlsx(casos,path = "Class_03/CasosenExcel.xlsx")
->>>>>>> ed42fa4c53f6b7dcc51fa4caf5137e403f3238ce
+
 
 library(foreign)
 
 write.dta
 
-<<<<<<< HEAD
+
 casosRM<-fread("Class_03/CasosCovid_RM.csv",header = T, showProgress = T,data.table = T) #fread sirve para leer datos muy pesados
-=======
+
 
 
 casosRM<-fread("Class_03/CasosCovid_RM.csv",header = T, showProgress = T,data.table = T)
->>>>>>> ed42fa4c53f6b7dcc51fa4caf5137e403f3238ce
+
 
 casosRM[,table(Sexo)]
-casosRM[Sexo=="Fememino",Sexo:="Femenino"]
+casosRM[Sexo=="Fememino",Sexo:="Femenino"] #reemplazare el nombre
 
 
-# Creating (factor) variables, variables de tipo string
+# Creating (factor) variables, variables de tipo string, tienen leyendas asociadas
+#Nos ayuda a convertir y manipular variables dentro de un data frame que tiene etiquetas
 
 class(casosRM$Sexo)
 
@@ -64,18 +72,27 @@ casosRM[,Sexo:=factor(Sexo)]
 
 head(casosRM$Sexo)
 head(as.numeric(casosRM$Sexo))
-table(casosRM$sexo)
+
+levels(casosRM$Sexo)
+labels(casosRM$Sexo)
+
+table(casosRM$Sexo)
 casosRM[,.N,by=.(Sexo)]
 casosRM[,.N,by=.(Sexo,`Centro de salud`)] #crea una columna N en donde suma a los Masculinos y Femeninos por clinica.
 
-#Collapsing by Centro de Salud , sumar las obs que uno quiere
+#Collapsing by Centro de Salud , sumar las observaciones que uno tiene y quiere sumar, consolidar una base de datos, va a juntar todas las clinicas los andes etc.
 
-n
-objeto1<-casosRM[,sum(`Casos confirmados`,na.rm = T),by=.(`Centro de salud`)][,V1/sum(V1,na.rm=T)]
+objeto1<-casosRM[,sum(`Casos confirmados`,na.rm = T),by=.(`Centro de salud`)]
 objeto1
+#Error por me suma el total de los casos 152
 
-<<<<<<< HEAD
-=======
+objeto1<-casosRM[,mean(Edad,na.rm = T),by=.(`Centro de salud`)]
+objeto1[,V1/sum(V1,na.rm=T)] #Le agrego a objeto 1 esta parte
+
+objeto1<-casosRM[,.N,by=.(`Centro de salud`)]
+objeto1
+#.N es el orador para que me cuente por centro de salud
+
 names(casosRM)
 obj1<-casosRM[,.N,by=.(`Centro de salud`)]
 
@@ -85,7 +102,7 @@ obj1[,sum(N,na.rm = T)]
 obj1[,porc:=N/sum(N,na.rm = T)]
 
 # collapsing (colapsar) by average age
->>>>>>> ed42fa4c53f6b7dcc51fa4caf5137e403f3238ce
+ed42fa4c53f6b7dcc51fa4caf5137e403f3238ce
 
 
 A<-casosRM[,.(AvAge=mean(Edad,na.rm = T)),by=.(`Centro de salud`)]
