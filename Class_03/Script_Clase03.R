@@ -80,60 +80,70 @@ table(casosRM$Sexo)
 casosRM[,.N,by=.(Sexo)]
 casosRM[,.N,by=.(Sexo,`Centro de salud`)] #crea una columna N en donde suma a los Masculinos y Femeninos por clinica.
 
-#Collapsing by Centro de Salud , sumar las observaciones que uno tiene y quiere sumar, consolidar una base de datos, va a juntar todas las clinicas los andes etc.
+#Collapsing by Centro de Salud , sumar las observaciones que uno tiene y quiere sumar.
 
 objeto1<-casosRM[,sum(`Casos confirmados`,na.rm = T),by=.(`Centro de salud`)]
 objeto1
-#Error por me suma el total de los casos 152
+#ERROR por me suma el total de los casos 152
 
 objeto1<-casosRM[,mean(Edad,na.rm = T),by=.(`Centro de salud`)]
 objeto1[,V1/sum(V1,na.rm=T)] #Le agrego a objeto 1 esta parte
+#collapsing lo que hace es consolidar una base de datos, va a juntar todas las clinicas los andes  y va a arrojar el promedi de edades.
 
-objeto1<-casosRM[,.N,by=.(`Centro de salud`)]
-objeto1
-#.N es el orador para que me cuente por centro de salud
 
 names(casosRM)
-obj1<-casosRM[,.N,by=.(`Centro de salud`)]
+obj1<-casosRM[,.N,by=.(`Centro de salud`)] #.N es el orador para que me cuente por centro de salud, cuantos casos hay por centro de salud
+names(casosRM)
 
+obj1[,sum(N,na.rm = T)] #Cuenta cuantos casos(N) hay.
 
-obj1[,sum(N,na.rm = T)]
+obj1[,N/sum(N,na.rm=T)] #me da la proporción de casos
 
-obj1[,porc:=N/sum(N,na.rm = T)]
+obj1[,porc:=N/sum(N,na.rm = T)] #Crea una variable que se llama porcentajes, esta variable esta dentro del objeto 1, por eso no imprime nada.
+
+###Ocupar .N en vez de la suma pq asi me va a sumar por casos no por la cantidad de casos confirmados, N cuenta cada linea
 
 # collapsing (colapsar) by average age
-ed42fa4c53f6b7dcc51fa4caf5137e403f3238ce
-
 
 A<-casosRM[,.(AvAge=mean(Edad,na.rm = T)),by=.(`Centro de salud`)]
+#Se lee: la media de edad con una variable AvAge, por centro de salud
 
 B<-casosRM[,.(Total_centro=.N),by=.(`Centro de salud`)]
 
-C<-casosRM[Sexo=="Femenino",.(Total_Centro_Mujeres=.N),by=.(`Centro de salud`)]
+C<-casosRM[Sexo=="Femenino",.(Total_Centro_Mujeres=.N),by=.(`Centro de salud`)] #Caso de las mujeres por centro
 
-D<-casosRM[Sexo=="Masculino",.(Total_Centro_Hombres=.N),by=.(`Centro de salud`)]
+D<-casosRM[Sexo=="Masculino",.(Total_Centro_Hombres=.N),by=.(`Centro de salud`)] #Caso de las hombres por centro
 
 dim(A)
 dim(B)
 dim(C)
 dim(D)
 
+casosRM[,.N,by=.(`Centro de salud`)]
+
 
 #merging data sets
+#MERGE vincular dos bases de datos con una variable clave( como ABCD)
 
+AB_Fake<-cbind(A,B$Total_centro) #Problema de esto esq asume que van a estar en el mismo orden
 
-AB<-merge(A,B,by = "Centro de salud",all = T,sort = F)
-
+AB<-merge(A,B,by = "Centro de salud",all = T,sort = F) #Juntar la variable A y B con esta variable clave que es centro de salud. 
+                                       #all: se quede con todos los datos, sort: que reorganice la base de datos en este caso no
 
 ABC<-merge(AB,C,by = "Centro de salud",all = T,sort = F)
 ABCD<-merge(ABC,D,by = "Centro de salud",all = T,sort = F)
+#Merge es bueno pr lo genera en base a cada fila
 
-ABCD[,porc_mujeres:=Total_Centro_Mujeres/Total_centro]
+ABCD[,porc_mujeres:=Total_Centro_Mujeres/Total_centro] #Sacar porcentajes de las variables
 
-
-# reshaping
+####### RESHAPING, para cambiar el formato de la base de datos, puede ser formato ancho para alado, o largo que es el tipico
 
 E<-casosRM[,.(AvAge=mean(Edad,na.rm = T),`Casos confirmados`=.N),by=.(`Centro de salud`,Sexo)]
+
+#Cambiar la posicion de los datos 
+#DIRECTION: WIDE --> posicion ancha, la tenemos larga
+#IDVAR--> la varaibale que yo quiero que se quede fija
+#timevar la que tiene 1 o 0
 
 G<-reshape(E,direction = 'wide',timevar = 'Sexo',v.names = c('AvAge','Casos confirmados'),idvar = 'Centro de salud')
 
